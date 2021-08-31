@@ -1,48 +1,51 @@
 <template>
-  <div id="app" class="flex justify-center items-center">
-    <div
-      class="home-page h-3/4 w-4/6 flex justify-center items-center"
-      :class="{ 'bg-gray-100': $route.name != 'login' }"
-    >
-      <Aside v-if="$route.name != 'login'"></Aside>
-      <router-view></router-view>
-    </div>
+  <div class="flex w-full h-full">
+    <Contact />
+    <Chat />
   </div>
 </template>
+
 <script>
-import Aside from "@/components/aside/index.vue";
+import Contact from "@/components/contact/index.vue";
+import Chat from "@/components/chat/index.vue";
 import {
-  setSessionStorage,
   getSessionStorage,
   getLocalStorage,
   getChatingPeople,
 } from "@/utils/localOps";
 export default {
   components: {
-    Aside,
+    Chat,
+    Contact,
   },
-  mounted() {
-    // console.log(this.$route);
-  },
-  created() {
+  sockets: {},
+  data() {
+    return {};
   },
   methods: {
     getInfFromLocalStorage() {
       //获取当前用户
       let user = getSessionStorage("user") || {};
+      this.$store.commit("setUser", user);
+      let userID = getSessionStorage("userID") || "";
+
       //获取当前正在聊天的人
       let curPeople = getSessionStorage("curPeople") || {};
+      this.$store.commit("setCurPeople", curPeople);
       //获取会话列表
       let chating = getChatingPeople() || [];
+      this.$store.commit("initChating", chating);
       //获取历史记录
       let historyChat = getLocalStorage("historyChat") || {};
       this.$store.commit("initHistoryChat", historyChat);
-      this.$store.commit("initChating", chating);
-      this.$store.commit("setUser", user);
-      this.$store.commit("setCurPeople", curPeople);
     },
   },
+  created() {
+    this.getInfFromLocalStorage();
+  },
+  mounted() {},
 };
 </script>
-<style lang="scss">
+
+<style  scoped>
 </style>

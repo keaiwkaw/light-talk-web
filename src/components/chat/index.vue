@@ -1,0 +1,223 @@
+<template>
+  <div
+    class="chat-cop flex-1 flex flex-col h-full ml-2"
+    v-if="this.$route.params.id"
+  >
+    <h1 class="text-3xl font-medium">
+      {{ $store.state.curPeople ? $store.state.curPeople.nickname : "" }}
+    </h1>
+    <div class="messageBox h-3/4 mt-3 overflow-y-scroll" ref="hideScrollBar">
+      <div
+        v-for="(item, idx) in $store.state.historyChat[$route.params.id]"
+        :key="idx"
+        class="w-full mb-5 px-2"
+      >
+        <div
+          :class="{ 'flex-row-reverse': item.user._id == userID }"
+          class="flex justify-start w-full items-center"
+        >
+          <img :src="item.user.avatar" alt="" class="w-10 h-10" />
+          <p
+            class="rounded-xl bg-gray-400 max-w-lg flex justify-center items-center p-2 mx-3"
+          >
+            {{ item.message }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="control-box h-1/4 flex flex-col">
+      <div class="util flex h-10">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 mr-5 text-gray-500 cursor-pointer hover:text-blue-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 mr-5 text-gray-500 cursor-pointer hover:text-blue-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+          />
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 mr-5 text-gray-500 cursor-pointer hover:text-blue-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+          />
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 mr-5 text-gray-500 cursor-pointer hover:text-blue-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+          />
+        </svg>
+      </div>
+      <div class="send-box h-full flex flex-col items-end">
+        <textarea
+          name=""
+          id=""
+          class="w-full h-4/6"
+          v-model="message"
+          @keydown.enter="sendMessage"
+        ></textarea>
+        <button
+          type="button"
+          class="w-20 bg-primary h-10 text-gray-50"
+          @click="sendMessage"
+        >
+          发送
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    v-else
+    class="flex justify-center items-center flex-1 flex-col h-full ml-2"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-20 w-20 text-gray-600"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+      />
+    </svg>
+  </div>
+</template>
+
+<script>
+import { getSessionStorage } from "@/utils/localOps";
+import { mapState } from "vuex";
+export default {
+  sockets: {
+    receive(data) {
+      // if (data.user._id == curPeople._id) {
+      // this.messageCollect.push({
+      //   // id: data.id,
+      //   // message: data.message,
+      //   user: data.user,
+      //   message: data.message,
+      // });
+      // }
+
+      this.$store.commit("addSingleMessage", {
+        user: data.user,
+        message: data.message,
+      });
+      this.updateScroll();
+      this.$store.commit("setChatingCount", data);
+      this.$store.commit("setChatingTimeAndMessage", {
+        people: data.user,
+        message: data.message,
+      });
+    },
+  },
+  data() {
+    return {
+      userID: getSessionStorage("userID"),
+      user: getSessionStorage("user"),
+      message: "",
+      messageCollect: [],
+    };
+  },
+  methods: {
+    //发送消息
+    sendMessage() {
+      this.$socket.emit("sendMessage", {
+        user: this.user,
+        message: this.message,
+        socketID: this.$store.getters.getUserSocketID(this.$route.params.id),
+      });
+      this.$store.commit("clearChatingCount", { _id: this.$route.params.id });
+      //将信息加入到信息队列中去
+      this.$store.commit("addSingleMessage", {
+        user: this.user,
+        message: this.message,
+        route: this.$route.params.id,
+      });
+      //将消息记录存到Vuex中
+      this.$store.commit("setChatingTimeAndMessage", {
+        people: this.curPeople,
+        message: this.message,
+      });
+      //滚动条滚到最底部
+      this.updateScroll();
+      this.message = "";
+    },
+    updateScroll() {
+      setTimeout(() => {
+        this.$refs.hideScrollBar.scrollTop = this.$refs.hideScrollBar.scrollHeight;
+      });
+    },
+  },
+  mounted() {
+    //将聊天窗口滚动条滚到最底部
+    if (this.$refs.hideScrollBar) {
+      this.$refs.hideScrollBar.scrollTop = this.$refs.hideScrollBar.scrollHeight;
+    }
+    // this.$refs.hideScrollBar.scrollTop = this.$refs.hideScrollBar.scrollHeight;
+    // this.updateScroll();
+  },
+  created() {},
+  watch: {
+    //第一次进入聊天页面 路由改变 我要更新滚动位置
+    $route(newValue, oldValue) {
+      this.updateScroll();
+    },
+  },
+  computed: {
+    ...mapState(["curPeople", "chating", "historyChat"]),
+  },
+};
+</script>
+
+<style  scoped>
+::-webkit-scrollbar {
+  /*滚动条整体样式*/
+  width: 0.5rem; /*高宽分别对应横竖滚动条的尺寸*/
+  height: 1px;
+  display: none;
+}
+textarea {
+  background: none !important;
+  outline: none;
+}
+</style>

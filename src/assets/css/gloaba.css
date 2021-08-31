@@ -1,0 +1,34 @@
+.login-box input{
+  background: none !important;
+  border: none !important;
+  color: white !important;
+  letter-spacing: 1px;
+  @apply font-semibold
+}
+.login-box input:focus{
+  background: none !important;
+  border: none !important;
+  color: white !important;
+  border-bottom: 1px solid white !important;
+} 
+.login-box label {
+  color: white !important;
+  @apply text-lg font-thin;
+} 
+/* .add-friends input{
+  @apply bg-white text-gray-900  !important;
+  outline: none;
+ 
+}
+.add-friends input:focus{
+  @apply bg-white text-gray-900  !important;
+  outline: none;
+  border:none;
+}
+.add-friends button{
+  @apply bg-white text-gray-900  !important;
+ 
+}
+.add-friends .el-select{
+  @apply w-10;
+} */

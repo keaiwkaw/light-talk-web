@@ -123,3 +123,38 @@ export const searchGroupToType = (data) =>
     value: data.value,
     selfID: data.selfID,
   });
+/* 
+发送添加群的请求
+*/
+export const sendRequestAddGroup = (data) =>
+  fetch(
+    "/sendRequestAddGroup",
+    {
+      selfID: data.selfID,
+      groupID: data.groupID,
+      message: data.message,
+    },
+    "POST"
+  );
+
+/* 
+  处理加群的请求
+  */
+export const dealRequestAddGroup = (data) =>
+  fetch(
+    "/dealRequestAddGroup",
+    {
+      code: data.code,
+      groupID: data.groupID,
+      userID: data.userID,
+    },
+    "POST"
+  );
+/* 
+获取请求列表
+*/
+export const getRequestListGroup = (data) =>
+  fetch("/getRequestListGroup", {
+    selfID: data.selfID,
+    type: data.type,
+  });

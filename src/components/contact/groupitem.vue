@@ -7,18 +7,20 @@
       <p class="text-lg font-semibold ml-1">我管理的群</p>
       <ul>
         <li
-          v-for="item in management"
-          :key="item._id"
+          v-for="(item, idx) in management"
+          :key="idx"
           class="flex items-center my-2"
         >
           <img
-            :src="item.group.avatar"
+            :src=" item.avatar"
             alt=""
             class="w-12 h-12 rounded-full mr-3 ml-2"
           />
           <div class="inf-box mr-1 flex-1">
             <div class="flex justify-between">
-              <p class="nowrap-hidden w-3/5">{{ item.group.nickname }}</p>
+              <p class="nowrap-hidden w-3/5">
+                {{ item.nickname  }}
+              </p>
             </div>
           </div>
         </li>
@@ -27,19 +29,15 @@
     <div class="join">
       <p class="text-lg font-semibold ml-1">我加入的群</p>
       <ul>
-        <li
-          v-for="item in management"
-          :key="item._id"
-          class="flex items-center"
-        >
+        <li v-for="(item, idx) in join" :key="idx" class="flex items-center">
           <img
-            :src="item.group.avatar"
+            :src="item.avatar"
             alt=""
             class="w-12 h-12 rounded-full mr-3 ml-2"
           />
           <div class="inf-box mr-1 flex-1">
             <div class="flex justify-between">
-              <p class="nowrap-hidden w-3/5">{{ item.group.nickname }}</p>
+              <p class="nowrap-hidden w-3/5">{{ item.nickname }}</p>
             </div>
           </div>
         </li>
@@ -108,7 +106,7 @@ export default {
         selfID: getSessionStorage("userID"),
         form: this.groupModel,
       });
-    
+
       if (res.code == 200) {
         this.getGroups();
         this.$message({
@@ -122,16 +120,27 @@ export default {
       let res = await getGroups({
         selfID: getSessionStorage("userID"),
       });
-      if (res.code === 200) {
+      if (res.code == 200) {
         let groups = res.groups;
-        console.log(res);
+        // console.log(res);
+        //群成员 0 群猪 2 管理1
         for (let i = 0; i < groups.length; i++) {
-          if (groups[i].type != 0) {
-            this.management.push(groups[i]);
-          } else {
-            this.join.push(groups[i]);
+          let myGroups = groups[i].groupMembers;
+          for (let j = 0; j < myGroups.length; j++) {
+            if (
+              myGroups[j].type != 0 &&
+              myGroups[j].user == getSessionStorage("userID")
+            ) {
+              this.management.push(groups[i]);
+            } else if (
+              myGroups[j].user == getSessionStorage("userID") &&
+              myGroups[j].type == 0
+            ) {
+              this.join.push(groups[i]);
+            }
           }
         }
+        console.log(this.join,this.management)
       }
     },
   },

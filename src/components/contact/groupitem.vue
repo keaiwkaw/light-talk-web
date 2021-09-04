@@ -9,17 +9,18 @@
         <li
           v-for="(item, idx) in management"
           :key="idx"
-          class="flex items-center my-2"
+          class="flex items-center my-2 cursor-pointer"
+          @click="goChatGroup(item)"
         >
           <img
-            :src=" item.avatar"
+            :src="item.avatar"
             alt=""
             class="w-12 h-12 rounded-full mr-3 ml-2"
           />
           <div class="inf-box mr-1 flex-1">
             <div class="flex justify-between">
               <p class="nowrap-hidden w-3/5">
-                {{ item.nickname  }}
+                {{ item.nickname }}
               </p>
             </div>
           </div>
@@ -27,9 +28,14 @@
       </ul>
     </div>
     <div class="join">
-      <p class="text-lg font-semibold ml-1">我加入的群</p>
+      <p class="text-lg font-semibold ml-1 ">我加入的群</p>
       <ul>
-        <li v-for="(item, idx) in join" :key="idx" class="flex items-center">
+        <li
+          v-for="(item, idx) in join"
+          :key="idx"
+          class="flex items-center cursor-pointer"
+          @click="goChatGroup(item)"
+        >
           <img
             :src="item.avatar"
             alt=""
@@ -121,6 +127,7 @@ export default {
         selfID: getSessionStorage("userID"),
       });
       if (res.code == 200) {
+        console.log(res);
         let groups = res.groups;
         // console.log(res);
         //群成员 0 群猪 2 管理1
@@ -129,19 +136,29 @@ export default {
           for (let j = 0; j < myGroups.length; j++) {
             if (
               myGroups[j].type != 0 &&
-              myGroups[j].user == getSessionStorage("userID")
+              myGroups[j].user._id == getSessionStorage("userID")
             ) {
               this.management.push(groups[i]);
             } else if (
-              myGroups[j].user == getSessionStorage("userID") &&
+              myGroups[j].user._id == getSessionStorage("userID") &&
               myGroups[j].type == 0
             ) {
               this.join.push(groups[i]);
             }
           }
         }
-        console.log(this.join,this.management)
       }
+      //获取完用户之后将用户的群传入rooms里面
+      this.$socket.emit("addGroup", {
+        userGroups: [...this.join, ...this.management],
+      });
+    },
+    goChatGroup(group) {
+      console.log(group);
+      this.$store.commit("addChating", group);
+      this.$store.commit("setCurPeople", group);
+      this.$router.push(`/chat/${group._id}`);
+      this.$store.commit("clearChatingCount", group); //清除小红点
     },
   },
   created() {

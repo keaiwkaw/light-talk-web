@@ -1,30 +1,19 @@
 <template>
   <div
-    class="chat-cop flex-1 flex flex-col h-full ml-2"
+    class="chat-cop flex-1 flex flex-col h-full ml-2 justify-between"
     v-if="this.$route.params.id"
   >
-    <h1 class="text-3xl font-medium">
+    <h1 class="text-2xl font-medium">
       {{ $store.state.curPeople ? $store.state.curPeople.nickname : "" }}
     </h1>
-    <div class="messageBox h-3/4 mt-3 overflow-y-scroll" ref="hideScrollBar">
-      <div
-        v-for="(item, idx) in $store.state.historyChat[$route.params.id]"
-        :key="idx"
-        class="w-full mb-5 px-2"
-      >
-        <div
-          :class="{ 'flex-row-reverse': item.user._id == userID }"
-          class="flex justify-start w-full items-center"
-        >
-          <img :src="item.user.avatar" alt="" class="w-10 h-10" />
-          <p
-            class="rounded-xl bg-gray-400 max-w-lg flex justify-center items-center p-2 mx-3"
-          >
-            {{ item.message }}
-          </p>
-        </div>
-      </div>
-    </div>
+    <!-- message-box -->
+    <friend-chat
+      v-if="!$store.state.curPeople.requestList"
+      ref="hideScrollBar"
+    />
+    <group-chat v-else ref="hideScrollBar" />
+
+    <!-- message-box-end -->
     <div class="control-box h-1/4 flex flex-col">
       <div class="util flex h-10">
         <svg
@@ -84,7 +73,7 @@
           />
         </svg>
       </div>
-      <div class="send-box h-full flex flex-col items-end">
+      <div class="send-box h-full flex flex-col items-end relative">
         <textarea
           name=""
           id=""
@@ -94,7 +83,7 @@
         ></textarea>
         <button
           type="button"
-          class="w-20 bg-primary h-10 text-gray-50"
+          class="w-20 bg-primary h-10 text-gray-50 absolute bottom-0"
           @click="sendMessage"
         >
           发送
@@ -126,23 +115,21 @@
 <script>
 import { getSessionStorage } from "@/utils/localOps";
 import { mapState } from "vuex";
+import friendChat from "./friendChat";
+import groupChat from "./groupChat";
 export default {
+  components: {
+    friendChat,
+    groupChat,
+  },
   sockets: {
     receive(data) {
-      // if (data.user._id == curPeople._id) {
-      // this.messageCollect.push({
-      //   // id: data.id,
-      //   // message: data.message,
-      //   user: data.user,
-      //   message: data.message,
-      // });
-      // }
-
+      console.log(data);
       this.$store.commit("addSingleMessage", {
         user: data.user,
         message: data.message,
+        route: this.$route.params.id,
       });
-      this.updateScroll();
       this.$store.commit("setChatingCount", data);
       this.$store.commit("setChatingTimeAndMessage", {
         people: data.user,
@@ -161,11 +148,21 @@ export default {
   methods: {
     //发送消息
     sendMessage() {
-      this.$socket.emit("sendMessage", {
-        user: this.user,
-        message: this.message,
-        socketID: this.$store.getters.getUserSocketID(this.$route.params.id),
-      });
+      if (!this.$store.state.curPeople.requestList) {
+        this.$socket.emit("sendMessage", {
+          user: this.user,
+          message: this.message,
+          socketID: this.$store.getters.getUserSocketID(this.$route.params.id),
+        });
+      } else {
+        console.log("群消息要发送了");
+        this.$socket.emit("sendMessageByGroup", {
+          user: this.user,
+          message: this.message,
+          group: this.$store.state.curPeople,
+        });
+      }
+
       this.$store.commit("clearChatingCount", { _id: this.$route.params.id });
       //将信息加入到信息队列中去
       this.$store.commit("addSingleMessage", {
@@ -179,22 +176,11 @@ export default {
         message: this.message,
       });
       //滚动条滚到最底部
-      this.updateScroll();
       this.message = "";
-    },
-    updateScroll() {
-      setTimeout(() => {
-        this.$refs.hideScrollBar.scrollTop = this.$refs.hideScrollBar.scrollHeight;
-      });
     },
   },
   mounted() {
     //将聊天窗口滚动条滚到最底部
-    if (this.$refs.hideScrollBar) {
-      this.$refs.hideScrollBar.scrollTop = this.$refs.hideScrollBar.scrollHeight;
-    }
-    // this.$refs.hideScrollBar.scrollTop = this.$refs.hideScrollBar.scrollHeight;
-    // this.updateScroll();
   },
   created() {},
   watch: {

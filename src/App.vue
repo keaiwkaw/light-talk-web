@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="flex justify-center items-center">
     <div
-      class="home-page h-3/4 w-4/6 flex justify-center items-center"
+      class="home-page h-5/6 w-4/6 flex justify-center items-center"
       :class="{ 'bg-gray-100': $route.name != 'login' }"
     >
       <Aside v-if="$route.name != 'login'"></Aside>

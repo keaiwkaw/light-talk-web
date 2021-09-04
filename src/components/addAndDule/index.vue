@@ -53,157 +53,33 @@
       </div>
     </div>
     <!-- 类容区 -->
-    <div
-      class="search-res flex-1 overflow-y-scroll w-full"
+    <friend-res
       v-if="cascaderValue[0] != 'groups'"
-    >
-      <div
-        class="res-item flex items-center justify-between px-10 pb-1 border-b-2 w-3-"
-        v-for="(item, idx) in searchRes"
-        :key="idx"
-        v-show="isAddfriend"
-      >
-        <div class="flex items-center">
-          <img :src="item.avatar" alt="" class="w-24 h-24" />
-          <div class="ml-20 font-medium text-2xl">{{ item.nickname }}</div>
-        </div>
-        <el-button
-          type="primary"
-          class="w-20 h-10"
-          @click="sendRequestAdd(item)"
-          :disabled="item.id == userID"
-          >添加+</el-button
-        >
-      </div>
-      <!-- 处理请求 -->
-      <div
-        class="res-item flex items-center justify-between px-10 pb-1 border-b-2 w-3-"
-        v-for="(item, idx) in requestRes"
-        :key="idx"
-        v-show="!isAddfriend"
-      >
-        <div class="flex items-center">
-          <img
-            :src="item[cascaderValSelect] ? item[cascaderValSelect].avatar : ''"
-            alt=""
-            class="w-24 h-24"
-          />
-          <div class="ml-20 font-medium text-2xl">
-            {{
-              item[cascaderValSelect] ? item[cascaderValSelect].nickname : ""
-            }}
-          </div>
-        </div>
-        <div class="btn-group">
-          <el-button
-            type="primary"
-            class="w-20 h-10"
-            @click="dealRequestAdd(item, 1)"
-            v-if="item.state == 0"
-            >同意</el-button
-          >
-          <el-button
-            type="primary"
-            class="w-20 h-10"
-            @click="dealRequestAdd(item, 2)"
-            v-if="item.state == 0"
-            >拒绝</el-button
-          >
-          <el-button
-            type="primary"
-            class="w-20 h-10"
-            v-if="item.state == 1"
-            :disabled="true"
-            >已通过</el-button
-          >
-          <el-button
-            type="primary"
-            class="w-20 h-10"
-            v-if="item.state == 2"
-            :disabled="true"
-            >已拒绝</el-button
-          >
-        </div>
-      </div>
-      <div></div>
-    </div>
+      :searchRes="searchRes"
+      :requestRes="requestRes"
+      :isAddfriend="isAddfriend"
+      :userID="userID"
+      @dealRequestAdd="dealRequestAdd"
+      @sendRequestAdd="sendRequestAdd"
+    />
     <!-- 类容结束 -->
-
-    <!-- 群类容开始 -->
-    <div class="search-res flex-1 overflow-y-scroll w-full" v-else>
-      <div
-        class="res-item flex items-center justify-between px-10 pb-1 border-b-2 w-3-"
-        v-for="(item, idx) in searchRes"
-        :key="idx"
-        v-show="isAddfriend"
-      >
-        <div class="flex items-center">
-          <img :src="item.avatar" alt="" class="w-24 h-24" />
-          <div class="ml-20 font-medium text-2xl">{{ item.nickname }}</div>
-        </div>
-        <el-button
-          type="primary"
-          class="w-20 h-10"
-          @click="sendRequestAdd(item)"
-          :disabled="item.id == userID"
-          >添加+</el-button
-        >
-      </div>
-      <!-- 处理请求 -->
-      <div
-        class="res-item flex items-center justify-between px-10 pb-1 border-b-2 w-3-"
-        v-for="(item, idx) in requestRes"
-        :key="idx"
-        v-show="!isAddfriend"
-      >
-        <div class="flex items-center">
-          <img :src="item.avatar" alt="" class="w-24 h-24" />
-          <div class="ml-20 font-medium text-2xl flex">
-            <div class="user-box flex justify-center items-center mr-7">
-              <img :src="item.user.avatar" alt="" class="w-12 h-12" />
-              <div class="text-sm ml-2">{{ item.user.nickname }}</div>
-            </div>
-            <div>{{ item.nickname }}</div>
-          </div>
-        </div>
-        <div class="btn-group">
-          <el-button
-            type="primary"
-            class="w-20 h-10"
-            @click="dealRequestAdd(item, 1)"
-            v-if="item.state == 0"
-            >同意</el-button
-          >
-          <el-button
-            type="primary"
-            class="w-20 h-10"
-            @click="dealRequestAdd(item, 2)"
-            v-if="item.state == 0"
-            >拒绝</el-button
-          >
-          <el-button
-            type="primary"
-            class="w-20 h-10"
-            v-if="item.state == 1"
-            :disabled="true"
-            >已通过</el-button
-          >
-          <el-button
-            type="primary"
-            class="w-20 h-10"
-            v-if="item.state == 2"
-            :disabled="true"
-            >已拒绝</el-button
-          >
-        </div>
-      </div>
-      <div></div>
-    </div>
+    <!--群类容  -->
+    <group-res
+      v-else
+      :searchRes="searchRes"
+      :requestRes="requestRes"
+      :isAddfriend="isAddfriend"
+      :userID="userID"
+      @dealRequestAdd="dealRequestAdd"
+      @sendRequestAdd="sendRequestAdd"
+    />
     <!-- 群类容结束 -->
   </div>
 </template>
 
 <script>
+import GroupRes from "./GroupRes";
+import FriendRes from "./FriendRes";
 import {
   searchPeopleToType,
   getRequestList,
@@ -216,11 +92,14 @@ import {
 } from "@/service/getData";
 import { getSessionStorage } from "@/utils/localOps";
 export default {
-  components: {},
+  components: {
+    GroupRes,
+    FriendRes,
+  },
   data() {
     return {
       userID: getSessionStorage("userID"),
-      cascaderValue: ["groups", "passing"],
+      cascaderValue: ["friends", "passing"],
       cascaderValSelect: "people",
       isAddfriend: true,
       input: "",
@@ -264,7 +143,6 @@ export default {
           ],
         },
       ],
-      // searchRes: new Array(10).fill({ name: "田浩伟" }),
       searchRes: [],
       requestRes: [],
     };
@@ -300,7 +178,7 @@ export default {
         this.searchRes = res.list;
       }
     },
-    //获取好友请求列表
+    //获取请求列表
     async getRequestList() {
       this.isAddfriend = false;
       let res = await getRequestList({
@@ -339,7 +217,7 @@ export default {
         this.requestRes = ans;
       }
     },
-    //处理好友请求
+    //处理请求
     async dealRequestAdd(item, code) {
       let res;
       if (this.cascaderValue[0] == "groups") {
@@ -365,7 +243,7 @@ export default {
         });
       }
     },
-    //发送添加好友请求
+    //发送添加请求
     async sendRequestAdd(item) {
       let res;
       if (this.select == "user") {
@@ -393,7 +271,7 @@ export default {
         });
       }
     },
-    //发送添加群的请求
+  
   },
 };
 </script>

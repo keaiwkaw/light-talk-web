@@ -1,7 +1,7 @@
 <template>
   <div class="h-full flex w-72">
     <div class="friend-item h-full">
-      <div v-for="item in block" :key="item.title">
+      <div v-for="item in $store.state.friendList" :key="item.title">
         <p class="ml-2" :id="'friend-' + item.title">{{ item.title }}</p>
         <div
           v-for="friend in item.friend"
@@ -27,7 +27,11 @@
     </div>
     <div class="jump flex-1 text-center absolute right-3 top-16">
       <ul class="p-0 m-0">
-        <li v-for="item in block" :key="item.title" class="m-0.5">
+        <li
+          v-for="item in $store.state.friendList"
+          :key="item.title"
+          class="m-0.5"
+        >
           <a :href="'#friend-' + item.title">{{ item.title }}</a>
         </li>
         <!-- <li v-for="item in mList" :key="item" class="m-0.5">
@@ -51,11 +55,11 @@ export default {
     };
   },
   async created() {
-    let res = await getFriends({ selfID: getSessionStorage("userID") });
-    if (res.code == 200) {
-      this.list = res.friends;
-    }
-    this.format();
+    // let res = await getFriends({ selfID: getSessionStorage("userID") });
+    // if (res.code == 200) {
+    //   this.list = res.friends;
+    // }
+    // this.format();
     // console.log(this.block);
   },
   methods: {

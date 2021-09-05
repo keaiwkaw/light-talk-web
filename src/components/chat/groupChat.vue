@@ -86,10 +86,6 @@ export default {
   data() {
     return {
       userID: getSessionStorage("userID"),
-      list: new Array(10).fill({
-        nickname: "田浩伟",
-        avatar: "http://topurl.cn/7YT",
-      }),
       isShow: false,
     };
   },

@@ -7,7 +7,7 @@
       <p class="text-lg font-semibold ml-1">我管理的群</p>
       <ul>
         <li
-          v-for="(item, idx) in management"
+          v-for="(item, idx) in $store.state.groupList.management"
           :key="idx"
           class="flex items-center my-2 cursor-pointer"
           @click="goChatGroup(item)"
@@ -28,10 +28,10 @@
       </ul>
     </div>
     <div class="join">
-      <p class="text-lg font-semibold ml-1 ">我加入的群</p>
+      <p class="text-lg font-semibold ml-1">我加入的群</p>
       <ul>
         <li
-          v-for="(item, idx) in join"
+          v-for="(item, idx) in $store.state.groupList.join"
           :key="idx"
           class="flex items-center cursor-pointer"
           @click="goChatGroup(item)"
@@ -162,7 +162,6 @@ export default {
     },
   },
   created() {
-    this.getGroups();
   },
 };
 </script>

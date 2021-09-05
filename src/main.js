@@ -5,9 +5,11 @@ import App from "./App.vue";
 import VueSocketio from "vue-socket.io";
 import SocketIO from "socket.io-client";
 import ElementUI from "element-ui";
-
 import router from "./router";
+import WebRTC from "vue-webrtc";
 Vue.config.productionTip = false;
+
+// 引入组件
 
 //引入css
 
@@ -36,7 +38,9 @@ Vue.use(
   })
 );
 Vue.use(ElementUI);
+Vue.use(WebRTC);
 VueFilter(Vue);
+
 // console.log(VueFilter)
 
 //混入方法
@@ -63,6 +67,26 @@ new Vue({
         socketID: this.$socket.id,
       });
       console.log("disconnect success");
+    },
+    receive(data) {
+      if (data.group) {
+        console.log("收到群消息", data);
+      } else {
+        console.log("收到好友消息", data);
+      }
+
+      this.$store.commit("addSingleMessage", {
+        user: data.user,
+        group: data.group,
+        message: data.message,
+        route: data.group ? data.group._id : data.user._id, //如果有group 代表他是一个群
+      });
+      this.$store.commit("setChatingCount", data);
+      this.$store.commit("setChatingTimeAndMessage", {
+        people: data.user,
+        message: data.message,
+        group: data.group,
+      });
     },
   },
   router,

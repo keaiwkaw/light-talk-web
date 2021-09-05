@@ -17,6 +17,8 @@ const store = new Vuex.Store({
     curPeople: null,
     chating: [],
     historyChat: {},
+    groupList: [],
+    friendList: [],
   },
   mutations: {
     /* 
@@ -75,11 +77,14 @@ const store = new Vuex.Store({
       设置最后会话时间和会话类容
     */
     setChatingTimeAndMessage(state, obj) {
-      let {people, message} = obj;
+      let {people, message, group} = obj;
       const {chating} = state;
+      let id = people._id;
+      if (group) {
+        id = group._id;
+      }
       for (let i = 0; i < chating.length; i++) {
-        if (people._id == chating[i]._id) {
-          chating[i].endMessage = message;
+        if (id == chating[i]._id) {
           Vue.set(chating[i], "endMessage", message);
           Vue.set(chating[i], "endTime", new Date().getTime());
           setChatingPeople(chating);
@@ -103,15 +108,25 @@ const store = new Vuex.Store({
     },
     //添加单条历史
     addSingleMessage(state, data) {
-      const {user, message, route} = data;
-      let id = user._id;
-      if (route) {
-        id = route;
+      const {user, message, route, group} = data;
+      const {chating} = state;
+      let isAdd = true;
+      for (let i = 0; i < chating.length; i++) {
+        if (chating[i]._id == route) {
+          isAdd = false;
+        }
       }
-      if (!state.historyChat[id]) {
-        Vue.set(state.historyChat, id, []);
+      if (isAdd) {
+        if (group) {
+          chating.push(group);
+        } else {
+          chating.push(user);
+        }
       }
-      state.historyChat[id].push({
+      if (!state.historyChat[route]) {
+        Vue.set(state.historyChat, route, []);
+      }
+      state.historyChat[route].push({
         user,
         message,
       });
@@ -123,7 +138,11 @@ const store = new Vuex.Store({
     setChatingCount(state, data) {
       const {chating} = state;
       for (let i = 0; i < chating.length; i++) {
-        if (chating[i]._id == data.user._id) {
+        let id = data.user._id; //好友消息
+        if (data.group) {
+          id = data.group._id; //群聊消息
+        }
+        if (chating[i]._id == id) {
           if (!chating[i].count) {
             Vue.set(chating[i], "count", 0);
           }
@@ -145,6 +164,15 @@ const store = new Vuex.Store({
         }
       }
       setChatingPeople(state.chating);
+    },
+    /* 
+      获取群聊列表
+    */
+    setGroupList(state, data) {
+      state.groupList = data;
+    },
+    setFriendList(state, data) {
+      state.friendList = data;
     },
   },
   getters: {

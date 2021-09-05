@@ -123,19 +123,7 @@ export default {
     groupChat,
   },
   sockets: {
-    receive(data) {
-      console.log(data);
-      this.$store.commit("addSingleMessage", {
-        user: data.user,
-        message: data.message,
-        route: this.$route.params.id,
-      });
-      this.$store.commit("setChatingCount", data);
-      this.$store.commit("setChatingTimeAndMessage", {
-        people: data.user,
-        message: data.message,
-      });
-    },
+   
   },
   data() {
     return {
@@ -185,9 +173,6 @@ export default {
   created() {},
   watch: {
     //第一次进入聊天页面 路由改变 我要更新滚动位置
-    $route(newValue, oldValue) {
-      this.updateScroll();
-    },
   },
   computed: {
     ...mapState(["curPeople", "chating", "historyChat"]),

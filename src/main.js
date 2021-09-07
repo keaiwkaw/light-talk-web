@@ -1,6 +1,6 @@
 import Vue from "vue";
 import App from "./App.vue";
-
+import {uuid} from "@/utils/util";
 //引入插件
 import VueSocketio from "vue-socket.io";
 import SocketIO from "socket.io-client";
@@ -8,7 +8,7 @@ import ElementUI from "element-ui";
 import router from "./router";
 import WebRTC from "vue-webrtc";
 Vue.config.productionTip = false;
-
+Vue.prototype.$uuid = uuid;
 // 引入组件
 
 //引入css
@@ -70,7 +70,6 @@ new Vue({
       });
       console.log("disconnect success");
     },
-   
   },
   router,
   store,

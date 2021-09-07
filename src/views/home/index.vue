@@ -1,13 +1,15 @@
 <template>
   <div class="flex w-full h-full">
     <Contact />
-    <Chat />
+    <Chat @toSendVideo="toSendVideo" />
+    <MyVideo ref="videoComp"></MyVideo>
   </div>
 </template>
 
 <script>
 import Contact from "@/components/contact/index.vue";
 import Chat from "@/components/chat/index.vue";
+import MyVideo from "@/components/video";
 import { getFriends, getGroups } from "@/service/getData";
 import {
   getSessionStorage,
@@ -19,6 +21,7 @@ export default {
   components: {
     Chat,
     Contact,
+    MyVideo,
   },
   sockets: {},
   data() {
@@ -29,6 +32,9 @@ export default {
     };
   },
   methods: {
+    toSendVideo(ob) {
+      this.$refs.videoComp.toSendVideo(ob);
+    },
     getInfFromLocalStorage() {
       //获取当前用户
       let user = getSessionStorage("user") || {};

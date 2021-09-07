@@ -6,7 +6,7 @@
       class="w-full mb-5 px-2"
     >
       <div
-        :class="{ 'flex-row-reverse': item.user._id || '' == userID }"
+        :class="{ 'flex-row-reverse': item.user._id == userID }"
         class="flex justify-start w-full items-center"
       >
         <img :src="item.user.avatar" alt="" class="w-10 h-10" />

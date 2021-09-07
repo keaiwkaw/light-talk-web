@@ -50,6 +50,7 @@
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          @click="toSendAudio(false)"
         >
           <path
             stroke-linecap="round"
@@ -91,7 +92,7 @@
         </button>
       </div>
     </div>
-    <videoComp ref="videoComp"></videoComp>
+    <!-- <videoComp ref="videoComp"></videoComp> -->
   </div>
   <div
     v-else
@@ -201,7 +202,10 @@ export default {
     },
     //视频聊天
     toSendVideo() {
-      this.$refs.videoComp.toSendVideo();
+      this.$emit("toSendVideo", true);
+    },
+    toSendAudio(boo) {
+      this.$emit("toSendVideo", false);
     },
   },
   mounted() {

@@ -129,6 +129,7 @@ export default {
     this.getInfFromLocalStorage();
     this.getFriendList();
     this.getGroupList();
+    this.$socket.open();
   },
   mounted() {},
 };

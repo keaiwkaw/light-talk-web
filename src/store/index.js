@@ -21,6 +21,7 @@ const store = new Vuex.Store({
     friendList: [],
   },
   mutations: {
+
     /* 
       设置用户
     */
@@ -177,6 +178,9 @@ const store = new Vuex.Store({
   },
   getters: {
     getUserSocketID: (state) => (id) => {
+      if (!state.onlineMap) {
+        return false;
+      }
       return state.onlineMap[id] || "";
     },
   },

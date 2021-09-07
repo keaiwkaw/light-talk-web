@@ -97,9 +97,11 @@ export default {
             type: "success",
             message: "登录成功",
           });
-          setSessionStorage("userID", res.id);
+          localStorage.setItem("id", res.id);
           this.$store.commit("setUser", res.user);
+          setSessionStorage("userID", res.id);
           setSessionStorage("token", res.token);
+      
           this.$router.push("/");
         }
       } else {

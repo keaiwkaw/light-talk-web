@@ -29,16 +29,16 @@ export const setLocalStorage = (name, val) => {
   if (typeof val !== "string") {
     val = JSON.stringify(val);
   }
-  const userID = getSessionStorage("userID");
-  window.localStorage.setItem(name + "-" + userID, val);
+  let _id = getSessionStorage("userID");
+  window.localStorage.setItem(name + "-" + _id, val);
 };
 
 /* 
 获取 local
 */
 export const getLocalStorage = (name) => {
-  const userID = getSessionStorage("userID");
-  let res = window.localStorage.getItem(name + "-" + userID);
+  let _id = getSessionStorage("userID");
+  let res = window.localStorage.getItem(name + "-" + _id);
 
   if (!res) {
     return "";

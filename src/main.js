@@ -22,14 +22,14 @@ import {getSessionStorage} from "@/utils/localOps";
 import {VueFilter} from "@/utils/filter";
 //安装  插件
 const socketOptions = {
-  autoConnect: true, // 自动连接     这里为我项目需求  需要在指定情况下才连接socket
+  autoConnect: false, // 自动连接     这里为我项目需求  需要在指定情况下才连接socket
 };
 
 Vue.use(
   new VueSocketio({
     debug: false,
-    // connection: SocketIO("http://127.0.0.1:7001", socketOptions),
-    connection: "http://127.0.0.1:7001",
+    connection: SocketIO("http://127.0.0.1:7001", socketOptions),
+    // connection: "http://127.0.0.1:7001",
     vuex: {
       store,
       actionPrefix: "SOCKET_",
@@ -52,6 +52,8 @@ Vue.mixin({
     },
   },
 });
+
+// new Vue 实例
 new Vue({
   sockets: {
     connect() {
@@ -68,26 +70,7 @@ new Vue({
       });
       console.log("disconnect success");
     },
-    receive(data) {
-      if (data.group) {
-        console.log("收到群消息", data);
-      } else {
-        console.log("收到好友消息", data);
-      }
-
-      this.$store.commit("addSingleMessage", {
-        user: data.user,
-        group: data.group,
-        message: data.message,
-        route: data.group ? data.group._id : data.user._id, //如果有group 代表他是一个群
-      });
-      this.$store.commit("setChatingCount", data);
-      this.$store.commit("setChatingTimeAndMessage", {
-        people: data.user,
-        message: data.message,
-        group: data.group,
-      });
-    },
+   
   },
   router,
   store,

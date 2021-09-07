@@ -1,12 +1,12 @@
 <template>
   <div class="messageBox h-4/6 mt-3 overflow-y-scroll" ref="hideScrollBar">
     <div
-      v-for="(item, idx) in $store.state.historyChat[$route.params.id]"
+      v-for="(item, idx) in $store.state.historyChat[$route.params.id] || []"
       :key="idx"
       class="w-full mb-5 px-2"
     >
       <div
-        :class="{ 'flex-row-reverse': item.user._id == userID }"
+        :class="{ 'flex-row-reverse': item.user._id || '' == userID }"
         class="flex justify-start w-full items-center"
       >
         <img :src="item.user.avatar" alt="" class="w-10 h-10" />
@@ -31,7 +31,9 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.$refs.hideScrollBar.scrollTop = 99999999;
+      if (this.$refs.hideScrollBar) {
+        this.$refs.hideScrollBar.scrollTop = this.$refs.hideScrollBar.scrollHeight;
+      }
     });
   },
   computed: {
@@ -41,7 +43,9 @@ export default {
     historyChat: {
       handler(newValue, oldValue) {
         this.$nextTick(() => {
-          this.$refs.hideScrollBar.scrollTop = 99999999;
+          if (this.$refs.hideScrollBar) {
+            this.$refs.hideScrollBar.scrollTop = this.$refs.hideScrollBar.scrollHeight;
+          }
         });
       },
       deep: true,

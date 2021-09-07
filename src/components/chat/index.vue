@@ -64,6 +64,7 @@
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          @click="toSendVideo"
         >
           <path
             stroke-linecap="round"
@@ -90,6 +91,7 @@
         </button>
       </div>
     </div>
+    <videoComp ref="videoComp"></videoComp>
   </div>
   <div
     v-else
@@ -117,31 +119,62 @@ import { getSessionStorage } from "@/utils/localOps";
 import { mapState } from "vuex";
 import friendChat from "./friendChat";
 import groupChat from "./groupChat";
+import videoComp from "@/components/video";
+
 export default {
   components: {
     friendChat,
     groupChat,
+    videoComp,
   },
   sockets: {
-   
+    receive(data) {
+      if (data.group) {
+        console.log("收到群消息", data);
+      } else {
+        console.log("收到好友消息", data);
+      }
+
+      this.$store.commit("addSingleMessage", {
+        user: data.user,
+        group: data.group,
+        message: data.message,
+        route: data.group ? data.group._id : data.user._id, //如果有group 代表他是一个群
+      });
+      this.$store.commit("setChatingCount", data);
+      this.$store.commit("setChatingTimeAndMessage", {
+        people: data.user,
+        message: data.message,
+        group: data.group,
+      });
+    },
   },
   data() {
     return {
       userID: getSessionStorage("userID"),
-      user: getSessionStorage("user"),
       message: "",
       messageCollect: [],
+      showVideoBox: false,
     };
   },
   methods: {
     //发送消息
     sendMessage() {
       if (!this.$store.state.curPeople.requestList) {
-        this.$socket.emit("sendMessage", {
-          user: this.user,
-          message: this.message,
-          socketID: this.$store.getters.getUserSocketID(this.$route.params.id),
-        });
+        let socketId = this.$store.getters.getUserSocketID(
+          this.$route.params.id
+        );
+        if (!socketId) {
+          this.$message.error("对方不在线哦！");
+        } else {
+          this.$socket.emit("sendMessage", {
+            user: this.user,
+            message: this.message,
+            socketID: this.$store.getters.getUserSocketID(
+              this.$route.params.id
+            ),
+          });
+        }
       } else {
         console.log("群消息要发送了");
         this.$socket.emit("sendMessageByGroup", {
@@ -166,21 +199,23 @@ export default {
       //滚动条滚到最底部
       this.message = "";
     },
+    //视频聊天
+    toSendVideo() {
+      this.$refs.videoComp.toSendVideo();
+    },
   },
   mounted() {
     //将聊天窗口滚动条滚到最底部
   },
   created() {},
-  watch: {
-    //第一次进入聊天页面 路由改变 我要更新滚动位置
-  },
+
   computed: {
-    ...mapState(["curPeople", "chating", "historyChat"]),
+    ...mapState(["curPeople", "chating", "historyChat", "user"]),
   },
 };
 </script>
 
-<style  scoped>
+<style scoped>
 ::-webkit-scrollbar {
   /*滚动条整体样式*/
   width: 0.5rem; /*高宽分别对应横竖滚动条的尺寸*/

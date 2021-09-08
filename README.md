@@ -1,13 +1,94 @@
-1. AB 创建本地媒体流 （假设 A 是发送方，B 是接收方，客户端简称为 C 端，服务端简称为 S）
-2. AB peer = new RTCPeerConnection
-3. 监听 peer 的事件
-   1. onicecandidate 如果本地代理 SDP Offer 并调用后，将 candidate 发送给对方
-   2. onaddstream 如果有视频流就拿到视频流
-4. 将本地视频流添加到 peer 中
-5. A 创建 offerA 并加入到 peerA 里
-6. AC setLocalDescription 后会触发 onicecandidate
-7. AC 触发 onicecandidate S 就会收到来自 AC 的 candidate
-8. S 将 AC 的 candidate 转发到 BC, BC 将 candidate 存入到 peerB 中
-9. AC 将 OfferA 发送给 BC
-10. BC 接收到 offerA 后，将 offerA 存入到 peerB 中
-    **上面的过程后 AB 将会建立好连接，然后 A B 监听的 onaddstream 事件就会有 stream 流入**
+1. ## README
+
+   Are you ready?
+
+   >Technology stack：Vue2.x，ElementUI，Fetch，Talidwindcss
+
+   **preface**: If you have any suggestions for me, you can make an issue at any time. If you think my code is helpful to you, can you give me a STAR? I will constantly improve my code
+
+## The difficulties in
+
+1. How do components pull out
+
+2. Multi-person audio and video implementation
+
+   etc.
+
+## Current progress
+
+### Completed
+
+- [x] The login
+
+- [x] The private chat
+
+- [x] Group chat
+
+- [x] P2P Audio and video
+- [x] Add buddy
+
+- [x] Add a group chat
+
+### Unimplemented
+
+- [ ] Modify the nickname
+- [ ] Modifying personal Information
+- [ ] Modify group chat information
+
+- [ ] Adding an Administrator
+
+## Problems in the current project
+
+1. Store not modular
+2. The template is not concise and there are many optimization possibilities
+3. State variables in components are not semantically named
+4. The interface interceptor
+
+## How to start
+
+**Make sure your Egg and mongodb are started**
+
+**First**
+
+`npm i or yarn add`
+
+**Second**
+
+`npm run serve or yarn serve`
+
+## Screenshot function
+
+**Login and Registration**
+
+![image-20210908214213234](https://i.loli.net/2021/09/08/wuPkX4nOLEChlBA.png)
+
+**Add buddy**
+
+![image-20210908214553284](https://i.loli.net/2021/09/08/eaGo2DUqFP3hvQg.png)
+
+**Handle the request**
+
+![image-20210908214649136](C:\Users\15458\AppData\Roaming\Typora\typora-user-images\image-20210908214649136.png)
+
+**Create a group chat**
+
+![image-20210908214800676](https://i.loli.net/2021/09/08/1fQG9M4Shdvs2Fb.png)
+
+**The private chat**
+
+![image-20210908214949654](https://i.loli.net/2021/09/08/vf7aZydKenoLmp2.png)
+
+**Group chat**
+
+![image-20210908215034554](https://i.loli.net/2021/09/08/zqQWRaPc9NK8SfT.png)
+
+P2P Video
+
+![1631109342903](https://i.loli.net/2021/09/08/HQokJD1wu2FcRhi.png)
+
+P2P Audio
+
+![image-20210908215706504](https://i.loli.net/2021/09/08/HQokJD1wu2FcRhi.png)
+
+[The back-end warehouse](https://github.com/adminthw/light-talk-server)
+

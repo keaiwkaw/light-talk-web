@@ -22,7 +22,7 @@ import {getSessionStorage} from "@/utils/localOps";
 import {VueFilter} from "@/utils/filter";
 //安装  插件
 const socketOptions = {
-  autoConnect: false, // 自动连接     这里为我项目需求  需要在指定情况下才连接socket
+  autoConnect: false, // 自动连接    
 };
 
 Vue.use(

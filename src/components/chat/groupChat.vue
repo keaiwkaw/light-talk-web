@@ -1,5 +1,5 @@
 <template>
-  <div class="messageBox h-4/6 mt-3 flex flex-row-reverse">
+  <div class="messageBox h-4/6  flex flex-row-reverse">
     <div
       class="group-people w-4/12 overflow-y-hidden flex flex-col border-t-2 border-l-2"
       v-if="isShow"
@@ -57,7 +57,11 @@
         />
       </svg>
     </div>
-    <div class="group-chat flex-1 overflow-y-scroll" ref="hideScrollBar">
+    <!-- 消息滚动区 -->
+    <div
+      class="group-chat flex-1 overflow-y-scroll border-t-2"
+      ref="hideScrollBar"
+    >
       <div
         v-for="(item, idx) in $store.state.historyChat[$route.params.id]"
         :key="idx"

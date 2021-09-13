@@ -127,7 +127,7 @@ export default {
         selfID: getSessionStorage("userID"),
       });
       if (res.code == 200) {
-        console.log(res);
+        // console.log(res);
         let groups = res.groups;
         // console.log(res);
         //群成员 0 群猪 2 管理1
@@ -154,7 +154,7 @@ export default {
       });
     },
     goChatGroup(group) {
-      console.log(group);
+      // console.log(group);
       this.$store.commit("addChating", group);
       this.$store.commit("setCurPeople", group);
       this.$router.push(`/chat/${group._id}`);

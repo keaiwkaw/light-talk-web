@@ -1,8 +1,9 @@
 <template>
   <div class="flex w-full h-full">
     <Contact />
-    <Chat @toSendVideo="toSendVideo" />
+    <Chat @toSendVideo="toSendVideo" @openAudioView="openAudioView" />
     <MyVideo ref="videoComp"></MyVideo>
+    <GroupAudio ref="groupAudio"></GroupAudio>
   </div>
 </template>
 
@@ -10,6 +11,7 @@
 import Contact from "@/components/contact/index.vue";
 import Chat from "@/components/chat/index.vue";
 import MyVideo from "@/components/video";
+import GroupAudio from "@/components/groupAudio";
 import { getFriends, getGroups } from "@/service/getData";
 import {
   getSessionStorage,
@@ -22,6 +24,7 @@ export default {
     Chat,
     Contact,
     MyVideo,
+    GroupAudio,
   },
   sockets: {},
   data() {
@@ -34,6 +37,9 @@ export default {
   methods: {
     toSendVideo(ob) {
       this.$refs.videoComp.toSendVideo(ob);
+    },
+    toSendVideoGroup(ob) {
+      this.$refs.groupAudio.toSendVideoGroup(ob);
     },
     getInfFromLocalStorage() {
       //获取当前用户
@@ -50,6 +56,10 @@ export default {
       //获取历史记录
       let historyChat = getLocalStorage("historyChat") || {};
       this.$store.commit("initHistoryChat", historyChat);
+    },
+    openAudioView() {
+      // console.log("我是home里面的方法：openAudioView");
+      this.$refs.groupAudio.openAudioView();
     },
     async getFriendList() {
       let res = await getFriends({ selfID: getSessionStorage("userID") });
@@ -136,6 +146,7 @@ export default {
     this.getFriendList();
     this.getGroupList();
     this.$socket.open();
+    // console.log(this.$refs.groupAudio);
   },
   mounted() {},
 };

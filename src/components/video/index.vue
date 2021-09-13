@@ -176,7 +176,7 @@ export default {
       await this.peer.setRemoteDescription(offer);
       const answer = await this.peer.createAnswer();
       await this.peer.setLocalDescription(answer);
-      this.$socket.emit("receiveAnsewer", { answer, user: this.user });
+      this.$socket.emit("receiveAnswer", { answer, user: this.user });
     },
     async receiveAnsewer(answer) {
       console.log("我收到了来自发送方的Answer:", answer);

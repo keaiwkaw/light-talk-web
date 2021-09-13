@@ -6,6 +6,13 @@
     <h1 class="text-2xl font-medium">
       {{ $store.state.curPeople ? $store.state.curPeople.nickname : "" }}
     </h1>
+    <div
+      @click="openAudioView"
+      class="joinAudio h-10 text-base w-3/4 flex justify-center items-center cursor-pointer flex-1"
+      v-if="groupHasAudio"
+    >
+      点击加入群音视频 >
+    </div>
     <!-- message-box -->
     <friend-chat
       v-if="!$store.state.curPeople.requestList"
@@ -14,6 +21,8 @@
     <group-chat v-else ref="hideScrollBar" />
 
     <!-- message-box-end -->
+
+    <!-- control-begin -->
     <div class="control-box h-1/4 flex flex-col">
       <div class="util flex h-10">
         <svg
@@ -50,7 +59,7 @@
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
-          @click="toSendAudio(false)"
+          @click="toSendAudio"
         >
           <path
             stroke-linecap="round"
@@ -82,6 +91,7 @@
           class="w-full h-4/6"
           v-model="message"
           @keydown.enter="sendMessage"
+          ref="sendArea"
         ></textarea>
         <button
           type="button"
@@ -92,8 +102,9 @@
         </button>
       </div>
     </div>
-    <!-- <videoComp ref="videoComp"></videoComp> -->
   </div>
+
+  <!-- 未在和任何人聊天时显示 -->
   <div
     v-else
     class="flex justify-center items-center flex-1 flex-col h-full ml-2"
@@ -156,6 +167,8 @@ export default {
       message: "",
       messageCollect: [],
       showVideoBox: false,
+      showGroupAudio: true,
+      groupHasAudio: false,
     };
   },
   methods: {
@@ -199,19 +212,34 @@ export default {
       });
       //滚动条滚到最底部
       this.message = "";
+      this.$refs.sendArea.focus();
     },
     //视频聊天
     toSendVideo() {
-      this.$emit("toSendVideo", true);
+      if (!this.$store.state.curPeople.requestList) {
+        //如果是好友视频通话
+        this.$emit("toSendVideo", true);
+      } else {
+        //如果是群视频
+        this.$emit("openAudioView", true);
+      }
     },
     toSendAudio(boo) {
       this.$emit("toSendVideo", false);
+    },
+    //打开群音视频窗口
+    openAudioView() {
+      this.$emit("openAudioView");
     },
   },
   mounted() {
     //将聊天窗口滚动条滚到最底部
   },
-  created() {},
+  created() {
+    this.$bus.$on("groupHasAudio", (msg) => {
+      this.groupHasAudio = msg;
+    });
+  },
 
   computed: {
     ...mapState(["curPeople", "chating", "historyChat", "user"]),

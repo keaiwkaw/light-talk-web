@@ -1,5 +1,5 @@
 <template>
-  <div class="messageBox h-4/6 mt-3 overflow-y-scroll" ref="hideScrollBar">
+  <div class="messageBox h-4/6 mt-3 overflow-y-scroll  border-top-2" ref="hideScrollBar">
     <div
       v-for="(item, idx) in $store.state.historyChat[$route.params.id] || []"
       :key="idx"

@@ -56,7 +56,7 @@ export default {
       chats: new Array(20).fill({ avatar: "http://t.hk.uy/Q7C" }),
       friends: [],
       groups: [],
-      tabName: "groups",
+      tabName: "chats",
     };
   },
   methods: {

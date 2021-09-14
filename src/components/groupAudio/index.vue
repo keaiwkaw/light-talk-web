@@ -63,103 +63,70 @@ export default {
     return {
       dialogVisible: false, //展示对话框
       showGroupAudio: false, //展示video
-      groupHasAudio: false, //群中是否有人打电话了
-      peer: null,
       localStream: null,
       boo: true,
-      videoList: [],
       offerOption: {
         offerToReceiveAudio: 1,
         offerToReceiveVideo: 1,
       },
       minimizeObjBool: false,
-      peerList: [],
+      pc: null,
+      groupUserList: [],
+      userPeerList: {},
+      isCreateOffer: false,
+      id: null,
     };
   },
   sockets: {
-    async receiveOfferGroup(offer) {
-      if (this.peer) {
-        await this.peer.setRemoteDescription(offer);
-        const answer = await this.peer.createAnswer();
-        await this.peer.setLocalDescription(answer);
-        this.$socket.emit("receiveAnswerGroup", {
-          answer,
-          group: this.$store.state.curPeople,
-          user: this.user,
-        });
-      }
+    async receiveOfferGroup(data) {
+      let peerName = this.user._id + "-" + data.user._id;
+      await this.userPeerList[peerName].setRemoteDescription(data.offer);
+      let answer = await this.userPeerList[peerName].createAnswer();
+      await this.userPeerList[peerName].setLocalDescription(answer);
+      this.$socket.emit("receiveAnswerGroup", {
+        group: this.$store.state.curPeople,
+        answer,
+        user: data.user,
+      });
     },
-    async receiveAnswerGroup(answer) {
-      if (this.peer) {
-        await this.peer.setRemoteDescription(answer);
-      }
+    async receiveAnswerGroup(data) {
+      let peerName = this.user._id + "-" + data.user._id;
+      await this.userPeerList[peerName].setRemoteDescription(data.answer);
     },
-    async answerVideoGroup(data) {
-      this.groupHasAudio = true;
-      this.$bus.$emit("groupHasAudio", this.groupHasAudio);
+    async answerVideoGroup() {
+      this.$bus.$emit("groupHasAudio", true);
     },
-    async addIceCandidateGroup(candidate) {
-      if (this.peer) {
-        await this.peer.addIceCandidate(candidate);
-      }
-    },
-    updatePeerList(peerList) {
-      this.peerList = peerList;
+    async addIceCandidateGroup(data) {
+      let peerName = this.user._id + "-" + data.user._id;
+      await this.userPeerList[peerName].addIceCandidate(data.candidate);
     },
   },
   methods: {
-    //群友确认加入时的逻辑
-    joinAudio() {
-      //加入逻辑
-      this.answerVideoGroup();
-      this.dialogVisible = false;
-      this.showGroupAudio = true;
-    },
-    //第一个人发起群视频
-    async answerVideoGroup() {
-      //展开的的点击加入框
-      //创建自己的localStream
-
-      this.localStream = await this.createLocalVideoStream();
-      this.videoList.push(this.localStream);
-      this.showGroupAudio = true;
-
-      this.createVideo(this.localStream, this.user);
-      console.log(this.localStream);
-      this.initVideoBoxEvent();
-      this.peer = new RTCPeerConnection();
-      this.$socket.emit("updatePeerList", {
-        peer: this.peer,
-        user: this.user,
-        group: this.$store.state.curPeople,
-      });
-      //找到当前的
-      console.log("peerList是：",this.peerList);
-      console.log("当前的peer是",this.peer);
-      let user = null;
-      for (let i = 0; i < this.peerList.length; i++) {
-        if (this.peerList[i].peer == this.peer) {
-          user = this.peerList[i].user;
-          break;
-        }
+    closeGroupVideo() {
+      if (this.localStream.getTracks()[0]) {
+        this.localStream.getTracks()[0].stop();
       }
-      console.log("找到的user是", user);
-      this.initPeerEvent(user);
-      //  console.log(this.peer);
-      await this.peer.addStream(this.localStream);
-      //发送自己的offer
-      const offer = await this.peer.createOffer(this.offerOption);
-      await this.peer.setLocalDescription(offer);
-      this.$socket.emit("receiveOfferGroup", {
-        group: this.$store.state.curPeople,
-        user: this.user,
-        offer: offer,
-      });
-      //通知别人
+      if (this.localStream.getTracks()[1]) {
+        this.localStream.getTracks()[1].stop();
+      }
+      const videoBox = this.$refs.videoBox;
+      videoBox.removeChild(document.getElementById(this.user._id));
+    },
+    //群友确认加入时的逻辑
+    async joinAudio() {
+      //加入逻辑
+      this.showGroupAudio = true;
+      this.dialogVisible = false;
+      await this.answerVideoGroup();
+    },
+    async answerVideoGroup() {
+      this.groupUserList = this.$store.state.curPeople.groupMembers.map(
+        (i) => i.user
+      );
       this.$socket.emit("answerVideoGroup", {
         group: this.$store.state.curPeople,
-        user: this.user,
       });
+      await this.init();
     },
     //创建stream
     async createLocalVideoStream() {
@@ -168,22 +135,7 @@ export default {
       return localStream;
     },
 
-    initPeerEvent(user) {
-      this.peer.onicecandidate = (e) => {
-        if (e.candidate) {
-          //向所有在线的用户发送ice代理
-          this.$socket.emit("addIceCandidateGroup", {
-            group: this.$store.state.curPeople,
-            user: this.user,
-            candidate: e.candidate,
-          });
-        }
-      };
-      this.peer.onaddstream = (e) => {
-        console.log("当触发加入事件时", e);
-        this.createVideo(e.stream, user);
-      };
-    },
+    //弹出是否加入群聊对话框
     openAudioView() {
       this.dialogVisible = true;
     },
@@ -193,38 +145,18 @@ export default {
       const videoBox = this.$refs.videoBox;
       let video = document.createElement("video");
       video.className = "w-32 h-32 border-2 border-blue-500 object-cover";
-      if (user) {
-        video.id = user._id;
-      }
+
+      video.id = user._id;
+
       video.autoplay = true;
       videoBox.appendChild(video);
       video.srcObject = stream;
     },
     //关闭群聊
-    closeGroupVideo() {
-      this.$socket.emit("hungupVideo");
-      this.peer = null;
-      const videoBox = this.$refs.videoBox;
-      const videos = videoBox.querySelectorAll("video");
-      console.log(videos);
-      let count = videos.length;
-      for (let i = 0; i < videos.length; i++) {
-        videoBox.removeChild(videos[i]);
-      }
-      // 关闭之后应当向服务器发送一个关闭的通知
-      console.log(count);
-      if (count > 1) {
-        this.groupHasAudio = true;
-        this.$bus.$emit("groupHasAudio", this.groupHasAudio);
-      } else {
-        this.groupHasAudio = false;
-        this.$bus.$emit("groupHasAudio", this.groupHasAudio);
-      }
-      this.showGroupAudio = false;
-    },
     minimize() {
       this.minimizeObjBool = !this.minimizeObjBool;
     },
+    //初始化拖动事件
     initVideoBoxEvent() {
       let box = this.$refs.slidBox;
       box.addEventListener("dragend", function (e) {
@@ -232,6 +164,59 @@ export default {
         box.style.top = event.clientY + "px";
         box.style.left = event.clientX + "px";
       });
+    },
+    //创建本地视频流并赋值给
+    async initVideoStream() {
+      this.localStream = await this.createLocalVideoStream();
+      this.createVideo(this.localStream, this.user);
+    },
+    async initPeerList() {
+      let localUser = this.user;
+      for (let user of this.groupUserList) {
+        if (localUser._id !== user._id) {
+          let peerName = localUser._id + "-" + user._id;
+          this.initPeer(peerName, user);
+        }
+      }
+    },
+    initPeer(peerName, user) {
+      let pc = new RTCPeerConnection();
+      pc.addStream(this.localStream);
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          this.$socket.emit("addIceCandidateGroup", {
+            candidate: event.candidate,
+            group: this.$store.state.curPeople,
+            user,
+          });
+        }
+      };
+      pc.onaddstream = (event) => {
+        this.createVideo(event.stream, user);
+      };
+      this.userPeerList[peerName] = pc;
+    },
+    async createOffer() {
+      let localUser = this.user;
+      for (const user of this.groupUserList) {
+        if (localUser._id !== user._id) {
+          let peerName = localUser._id + "-" + user._id;
+          let offer = await this.userPeerList[peerName].createOffer(
+            this.offerOption
+          );
+          await this.userPeerList[peerName].setLocalDescription(offer);
+          this.$socket.emit("receiveOfferGroup", {
+            offer,
+            user: this.user,
+            group: this.$store.state.curPeople,
+          });
+        }
+      }
+    },
+    async init() {
+      await this.initVideoStream();
+      await this.initPeerList();
+      await this.createOffer();
     },
   },
   computed: {
@@ -249,15 +234,15 @@ export default {
     },
   },
   watch: {
-    showGroupAudio(newValue, oldValue) {
-      if (newValue) {
-        this.groupHasAudio = false;
-        this.$bus.$emit("groupHasAudio", this.groupHasAudio);
-      } else {
-        this.groupHasAudio = true;
-        this.$bus.$emit("groupHasAudio", this.groupHasAudio);
-      }
-    },
+    // showGroupAudio(newValue, oldValue) {
+    //   if (newValue) {
+    //     this.groupHasAudio = false;
+    //     this.$bus.$emit("groupHasAudio", this.groupHasAudio);
+    //   } else {
+    //     this.groupHasAudio = true;
+    //     this.$bus.$emit("groupHasAudio", this.groupHasAudio);
+    //   }
+    // },
   },
 };
 </script>

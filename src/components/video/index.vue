@@ -101,6 +101,12 @@ export default {
           : "对方取消了视频";
       this.$message.info(infoTips);
       this.showVideoBox = false;
+      if (this.localStream.getTracks()[0]) {
+        this.localStream.getTracks()[0].stop();
+      }
+      if (this.localStream.getTracks()[1]) {
+        this.localStream.getTracks()[1].stop();
+      }
       if (this.$refs.video) {
         this.$refs.video.srcObject = null;
       }
@@ -113,6 +119,13 @@ export default {
           : "对方挂断了视频";
       this.$message.info(infoTips);
       this.peer.close();
+      if (this.localStream.getTracks()[0]) {
+        this.localStream.getTracks()[0].stop();
+      }
+      if (this.localStream.getTracks()[1]) {
+        this.localStream.getTracks()[1].stop();
+      }
+
       this.peer = null;
       this.showVideoBox = false;
       this.$refs.video.srcObject = null;
@@ -125,6 +138,12 @@ export default {
       this.showVideoBox = false;
       this.$refs.video.srcObject = null;
       this.$refs.videoMy.srcObject = null;
+      if (this.localStream.getTracks()[0]) {
+        this.localStream.getTracks()[0].stop();
+      }
+      if (this.localStream.getTracks()[1]) {
+        this.localStream.getTracks()[1].stop();
+      }
     },
     async addIceCandidate(candidate) {
       await this.peer.addIceCandidate(candidate);

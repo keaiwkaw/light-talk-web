@@ -24,13 +24,21 @@
 
     <!-- control-begin -->
     <div class="control-box h-1/4 flex flex-col">
-      <div class="util flex h-10">
+      <div class="util flex h-10 relative">
+        <VEmojiPicker
+          @select="selectEmoji"
+          v-show="showEmojipicker"
+          emojiSize="25"
+          emojisByRow="5"
+          class="absolute bottom-10"
+        />
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-6 w-6 mr-5 text-gray-500 cursor-pointer hover:text-blue-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          @click="showEmojipicker = !showEmojipicker"
         >
           <path
             stroke-linecap="round"
@@ -148,17 +156,13 @@ export default {
       }
 
       this.$store.commit("addSingleMessage", {
+        people: data.user,
         user: data.user,
         group: data.group,
         message: data.message,
         route: data.group ? data.group._id : data.user._id, //如果有group 代表他是一个群
       });
       this.$store.commit("setChatingCount", data);
-      this.$store.commit("setChatingTimeAndMessage", {
-        people: data.user,
-        message: data.message,
-        group: data.group,
-      });
     },
   },
   data() {
@@ -169,24 +173,24 @@ export default {
       showVideoBox: false,
       showGroupAudio: true,
       groupHasAudio: false,
+      showEmojipicker: false,
     };
   },
   methods: {
     //发送消息
     sendMessage() {
-      if (!this.$store.state.curPeople.requestList) {
-        let socketId = this.$store.getters.getUserSocketID(
-          this.$route.params.id
-        );
+      let curPeopleId = this.$route.params.id;
+      let socketId = this.$store.getters.getUserSocketID(curPeopleId);
+      let curPeople = this.$store.state.curPeople;
+      if (!curPeople.requestList) {
         if (!socketId) {
           this.$message.error("对方不在线哦！");
+          return;
         } else {
           this.$socket.emit("sendMessage", {
             user: this.user,
             message: this.message,
-            socketID: this.$store.getters.getUserSocketID(
-              this.$route.params.id
-            ),
+            socketID: socketId,
           });
         }
       } else {
@@ -194,25 +198,23 @@ export default {
         this.$socket.emit("sendMessageByGroup", {
           user: this.user,
           message: this.message,
-          group: this.$store.state.curPeople,
+          group: curPeople,
         });
       }
 
-      this.$store.commit("clearChatingCount", { _id: this.$route.params.id });
+      this.$store.commit("clearChatingCount", { _id: curPeopleId });
       //将信息加入到信息队列中去
       this.$store.commit("addSingleMessage", {
         user: this.user,
         message: this.message,
-        route: this.$route.params.id,
-      });
-      //将消息记录存到Vuex中
-      this.$store.commit("setChatingTimeAndMessage", {
+        route: curPeopleId,
         people: this.curPeople,
-        message: this.message,
       });
+      // this.$store.commit("addChating", this.curPeople);
       //滚动条滚到最底部
       this.message = "";
       this.$refs.sendArea.focus();
+      this.showEmojipicker = false;
     },
     //视频聊天
     toSendVideo() {
@@ -230,6 +232,19 @@ export default {
     //打开群音视频窗口
     openAudioView() {
       this.$emit("openAudioView");
+    },
+    selectEmoji(emoji) {
+      let sendArea = this.$refs.sendArea;
+      let start = sendArea.selectionStart;
+      let end = sendArea.selectionEnd;
+      if (start == undefined || end == undefined) return;
+      let val = sendArea.value;
+      let result = val.substring(0, start) + emoji.data + val.substring(end);
+      sendArea.value = result;
+      sendArea.focus();
+      sendArea.selectionStart = start + emoji.data.length;
+      sendArea.selectionEnd = start + emoji.data.length;
+      this.message = result;
     },
   },
   mounted() {

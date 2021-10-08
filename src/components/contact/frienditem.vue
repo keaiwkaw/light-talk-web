@@ -6,8 +6,9 @@
         <div
           v-for="friend in item.friend"
           :key="friend._id"
-          class="h-16 flex items-center box-border"
+          class="h-16 flex items-center box-border cursor-pointer hover:bg-gray-200"
           @click="goChat(friend)"
+          @contextmenu.prevent="showMenu(friend)"
         >
           <img
             :src="friend.avatar"

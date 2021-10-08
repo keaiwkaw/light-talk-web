@@ -9,7 +9,7 @@
         <li
           v-for="(item, idx) in $store.state.groupList.management"
           :key="idx"
-          class="flex items-center my-2 cursor-pointer"
+          class="flex items-center my-2 cursor-pointer  hover:bg-gray-200"
           @click="goChatGroup(item)"
         >
           <img

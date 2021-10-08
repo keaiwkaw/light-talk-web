@@ -2,7 +2,7 @@
   <div class="audio-group">
     <div
       class="overflow-scroll groupAudio fixed top-1/2 left-1/2 flex max-h-64 max-w-lg flex-wrap transform -translate-x-1/2 -translate-y-1/2"
-      v-if="showGroupAudio"
+      v-if="true"
       draggable="true"
       :class="minimizeObj"
       ref="slidBox"
@@ -79,26 +79,39 @@ export default {
   },
   sockets: {
     async receiveOfferGroup(data) {
-      let peerName = this.user._id + "-" + data.user._id;
-      await this.userPeerList[peerName].setRemoteDescription(data.offer);
-      let answer = await this.userPeerList[peerName].createAnswer();
-      await this.userPeerList[peerName].setLocalDescription(answer);
-      this.$socket.emit("receiveAnswerGroup", {
-        group: this.$store.state.curPeople,
-        answer,
-        user: data.user,
-      });
+      let peerName = data.user._id;
+      if (this.userPeerList[peerName]) {
+        await this.userPeerList[peerName].setRemoteDescription(data.offer);
+        let answer = await this.userPeerList[peerName].createAnswer();
+        await this.userPeerList[peerName].setLocalDescription(answer);
+        this.$socket.emit("receiveAnswerGroup", {
+          group: this.$store.state.curPeople,
+          answer,
+          user: data.user,
+        });
+      }
     },
     async receiveAnswerGroup(data) {
-      let peerName = this.user._id + "-" + data.user._id;
-      await this.userPeerList[peerName].setRemoteDescription(data.answer);
+      let peerName = data.user._id;
+      if (this.userPeerList[peerName]) {
+        await this.userPeerList[peerName].setRemoteDescription(data.answer);
+      }
     },
     async answerVideoGroup() {
+      this.groupUserList = this.$store.state.curPeople.groupMembers.map(
+        (i) => i.user
+      );
+      this.localStream = await this.createLocalVideoStream();
+      console.log("收到邀请创建localStream", this.localStream);
+      await this.initPeerList();
+      await this.onCreateOffer(); //给除过自己的所有群友setLocalDescription
       this.$bus.$emit("groupHasAudio", true);
     },
     async addIceCandidateGroup(data) {
-      let peerName = this.user._id + "-" + data.user._id;
-      await this.userPeerList[peerName].addIceCandidate(data.candidate);
+      let peerName = data.user._id;
+      if (this.userPeerList[peerName]) {
+        await this.userPeerList[peerName].addIceCandidate(data.candidate);
+      }
     },
   },
   methods: {
@@ -117,16 +130,19 @@ export default {
       //加入逻辑
       this.showGroupAudio = true;
       this.dialogVisible = false;
-      await this.answerVideoGroup();
+      await this.answerVideoGroup(); //通知所有客户端获取群中人员列表
+      setTimeout(async () => {
+        console.log("localStream", this.localStream);
+        await this.initVideoStream(); //初始化本地的视频流
+      }, 2000);
+
+      // await this.initPeerList(); // 给除过自己的所有群友初始化 pc
+      // await this.onCreateOffer(); //给除过自己的所有群友setLocalDescription
     },
-    async answerVideoGroup() {
-      this.groupUserList = this.$store.state.curPeople.groupMembers.map(
-        (i) => i.user
-      );
+    answerVideoGroup() {
       this.$socket.emit("answerVideoGroup", {
         group: this.$store.state.curPeople,
       });
-      await this.init();
     },
     //创建stream
     async createLocalVideoStream() {
@@ -167,56 +183,54 @@ export default {
     },
     //创建本地视频流并赋值给
     async initVideoStream() {
-      this.localStream = await this.createLocalVideoStream();
       this.createVideo(this.localStream, this.user);
     },
     async initPeerList() {
-      let localUser = this.user;
+      this.userPeerList = [];
       for (let user of this.groupUserList) {
-        if (localUser._id !== user._id) {
-          let peerName = localUser._id + "-" + user._id;
+        // 给除过自己的所有群友初始化 pc‘
+
+        if (user._id != this.user._id) {
+          let peerName = user._id;
+          console.log(user);
           this.initPeer(peerName, user);
         }
       }
     },
     initPeer(peerName, user) {
       let pc = new RTCPeerConnection();
-      pc.addStream(this.localStream);
+      let that = this;
+      pc.addStream(that.localStream);
       pc.onicecandidate = (event) => {
         if (event.candidate) {
-          this.$socket.emit("addIceCandidateGroup", {
+          that.$socket.emit("addIceCandidateGroup", {
             candidate: event.candidate,
-            group: this.$store.state.curPeople,
+            group: that.$store.state.curPeople,
             user,
           });
         }
       };
       pc.onaddstream = (event) => {
-        this.createVideo(event.stream, user);
+        that.createVideo(event.stream, user);
       };
-      this.userPeerList[peerName] = pc;
+      that.userPeerList[peerName] = pc;
     },
-    async createOffer() {
-      let localUser = this.user;
-      for (const user of this.groupUserList) {
-        if (localUser._id !== user._id) {
-          let peerName = localUser._id + "-" + user._id;
-          let offer = await this.userPeerList[peerName].createOffer(
-            this.offerOption
+    async onCreateOffer() {
+      let that = this;
+      for (const user of that.groupUserList) {
+        if (that.user._id != user._id) {
+          const peerName = user._id;
+          let offer = await that.userPeerList[peerName].createOffer(
+            that.offerOption
           );
-          await this.userPeerList[peerName].setLocalDescription(offer);
-          this.$socket.emit("receiveOfferGroup", {
+          await that.userPeerList[peerName].setLocalDescription(offer);
+          that.$socket.emit("receiveOfferGroup", {
             offer,
-            user: this.user,
-            group: this.$store.state.curPeople,
+            user,
+            group: that.$store.state.curPeople,
           });
         }
       }
-    },
-    async init() {
-      await this.initVideoStream();
-      await this.initPeerList();
-      await this.createOffer();
     },
   },
   computed: {
@@ -232,17 +246,6 @@ export default {
         };
       }
     },
-  },
-  watch: {
-    // showGroupAudio(newValue, oldValue) {
-    //   if (newValue) {
-    //     this.groupHasAudio = false;
-    //     this.$bus.$emit("groupHasAudio", this.groupHasAudio);
-    //   } else {
-    //     this.groupHasAudio = true;
-    //     this.$bus.$emit("groupHasAudio", this.groupHasAudio);
-    //   }
-    // },
   },
 };
 </script>

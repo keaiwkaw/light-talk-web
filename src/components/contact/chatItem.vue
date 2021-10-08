@@ -1,10 +1,11 @@
 <template>
-  <div class="h-full">
-    <div class="chat-item h-full">
+  <div class="h-full w-72">
+    <div class="chat-item h-full w-72">
       <div
         v-for="chat in chating"
         :key="chat._id"
-        class="h-16 flex items-center box-border cursor-pointer relative"
+        class="h-16 w-full flex items-center box-border  relative cursor-pointer  hover:bg-gray-200 "
+        :class="{active:chat._id===$route.params.id}"
         @click="goChat(chat)"
       >
         <div
@@ -18,7 +19,7 @@
           alt=""
           class="w-12 h-12 rounded-full mr-3 ml-2"
         />
-        <div class="inf-box mr-1 flex-1">
+        <div class="inf-box h-full justify-center w-full flex flex-col">
           <div class="flex justify-between">
             <p class="nowrap-hidden w-3/5">{{ chat.nickname }}</p>
             <p
@@ -51,14 +52,17 @@ export default {
   },
   methods: {
     goChat(people) {
-      this.$store.commit("addChating", people);
+      // this.$store.commit("addChating", people);
       this.$store.commit("setCurPeople", people);
       this.$router.push(`/chat/${people._id}`);
-      this.$store.commit('clearChatingCount',people)
+      this.$store.commit("clearChatingCount", people);
     },
   },
 };
 </script>
 
 <style scoped>
+.active{
+  background: rgba(0, 0, 0, .2) !important;
+}
 </style>

@@ -4,13 +4,13 @@
       class="home-page h-5/6 w-4/6 flex justify-center items-center"
       :class="{ 'bg-gray-100': $route.name != 'login' }"
     >
-      <Aside v-if="$route.name != 'login'"></Aside>
+      <left-util v-if="$route.name != 'login'"></left-util>
       <router-view></router-view>
     </div>
   </div>
 </template>
 <script>
-import Aside from "@/components/aside/index.vue";
+import leftUtil from "@/components/leftUtil/index.vue";
 import {
   setSessionStorage,
   getSessionStorage,
@@ -19,13 +19,12 @@ import {
 } from "@/utils/localOps";
 export default {
   components: {
-    Aside,
+    leftUtil,
   },
   mounted() {
     // console.log(this.$route);
   },
-  created() {
-  },
+  created() {},
   methods: {
     getInfFromLocalStorage() {
       //获取当前用户

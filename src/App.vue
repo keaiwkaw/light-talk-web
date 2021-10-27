@@ -4,13 +4,13 @@
       class="home-page h-5/6 w-4/6 flex justify-center items-center"
       :class="{ 'bg-gray-100': $route.name != 'login' }"
     >
-      <left-util v-if="$route.name != 'login'"></left-util>
+      <ToolsMenu v-if="$route.name != 'login'"></ToolsMenu>
       <router-view></router-view>
     </div>
   </div>
 </template>
 <script>
-import leftUtil from "@/components/leftUtil/index.vue";
+import ToolsMenu from "@/views/tools-menu/index.vue";
 import {
   setSessionStorage,
   getSessionStorage,
@@ -19,7 +19,7 @@ import {
 } from "@/utils/localOps";
 export default {
   components: {
-    leftUtil,
+    ToolsMenu,
   },
   mounted() {
     // console.log(this.$route);

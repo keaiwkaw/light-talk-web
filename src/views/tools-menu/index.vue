@@ -15,9 +15,18 @@
         <i class="el-icon-user-solid text-3xl mt-2 text-gray-100"></i>
       </p>
     </div>
-    <div class="aside-bottom mb-10">
+    <div class="aside-bottom mb-10" @click="dialogVisible = true">
       <i class="el-icon-setting text-3xl text-gray-100 cursor-pointer"></i>
     </div>
+    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+      <span>设置你的个人信息</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -27,6 +36,7 @@ export default {
   data() {
     return {
       avatar: "",
+      dialogVisible: false,
     };
   },
   methods: {
@@ -35,9 +45,8 @@ export default {
     },
   },
   created() {
-   this.avatar=getSessionStorage("user").avatar 
+    this.avatar = getSessionStorage("user").avatar;
   },
-  
 };
 </script>
 

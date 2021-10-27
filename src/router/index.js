@@ -1,9 +1,8 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import login from "@/views/login";
-import home from "@/views/home";
-import test from "@/views/test";
-import addAndDule from "@/components/addAndDule";
+import home from "@/views/index";
+import addFriends from "@/views/add-friends";
 Vue.use(VueRouter);
 
 const routes = [
@@ -17,24 +16,20 @@ const routes = [
   },
   {
     path: "/",
-    name: "home",
+    name: "index",
     component: home,
   },
   {
     path: "/chat/:id",
-    name: "chatToPeople",
+    name: "chating",
     component: home,
   },
   {
-    path: "/addAndDule",
-    name: "addAndDule",
-    component: addAndDule,
+    path: "/addFriends",
+    name: "addFriends",
+    component: addFriends,
   },
-  {
-    path: "/test",
-    name: "test",
-    component: test,
-  },
+ 
 ];
 
 const router = new VueRouter({

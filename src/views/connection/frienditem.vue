@@ -6,20 +6,40 @@
         <div
           v-for="friend in item.friend"
           :key="friend._id"
-          class="h-16 flex items-center box-border cursor-pointer hover:bg-gray-200"
+          class="h-16 flex items-center box-border cursor-pointer hover:bg-gray-200 relative z-10 closeMenu"
           @click="goChat(friend)"
           @contextmenu.prevent="showMenu(friend)"
         >
+          <div
+            class="absolute flex flex-col h-16 bg-gray-100 rounded-md justify-center items-center w-24 -right-8 top-8 box-border border-2 z-20 showMenu"
+            v-if="friend.show"
+          >
+            <div
+              class="h-1/2 flex justify-center items-center border-b-2 w-full text-xs showMenu hover:bg-gray-300"
+              @click="deleteFriend(friend)"
+            >
+              删除好友
+            </div>
+            <div
+              class="h-1/2 flex justify-center items-center w-full text-xs showMenu hover:bg-gray-300"
+              @click="modifyTheRemark(friend)"
+            >
+              修改备注
+            </div>
+            <div
+              class="h-1/2 flex justify-center items-center w-full text-xs showMenu hover:bg-gray-300"
+              @click="CheckTheData(friend)"
+            >
+              查看资料
+            </div>
+          </div>
           <img
             :src="friend.avatar"
             alt=""
-            class="w-12 h-12 rounded-full mr-3 ml-2"
+            class="w-12 h-12 rounded-full mr-3 ml-2 closeMenu"
           />
-          <div class="inf-box mr-1 flex-1">
-            <div class="flex justify-between">
-              <p class="nowrap-hidden">{{ friend.notename }}</p>
-            </div>
-            <p class="nowrap-hidden text-sm w-44">
+          <div class="inf-box mr-1 flex-1 closeMenu">
+            <p class="nowrap-hidden text-sm w-44 closeMenu">
               {{ friend.notename || friend.nickname }}
             </p>
           </div>
@@ -109,8 +129,31 @@ export default {
       this.$router.push(`/chat/${people._id}`);
       // console.log(this.$store.state.chating);
     },
+    showMenu(friend) {
+      this.clearAllMenu();
+      this.$set(friend, "show", true);
+    },
+    modifyTheRemark(friend) {
+      console.log("修改备注");
+    },
+    deleteFriend(friend) {
+      console.log("删除好友");
+    },
+    clearAllMenu() {
+      for (const item of this.$store.state.friendList) {
+        for (const friend of item.friend) {
+          this.$set(friend, "show", false);
+        }
+      }
+    },
   },
-  async mounted() {},
+  async mounted() {
+    document.addEventListener("click", (e) => {
+      if (!e.target.classList.contains("showMenu")) {
+        this.clearAllMenu();
+      }
+    });
+  },
 };
 </script>
 

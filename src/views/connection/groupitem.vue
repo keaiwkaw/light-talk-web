@@ -166,7 +166,7 @@ export default {
 };
 </script>
 
-<style  scoped>
+<style  scoped >
 .avatar-uploader {
   @apply w-16 h-16 flex justify-center items-center;
   border: 1px solid rgba(0, 0, 0, 0.2);

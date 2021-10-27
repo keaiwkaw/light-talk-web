@@ -381,6 +381,6 @@ export default {
 <style lang="scss" scoped>
 .video-box {
   transform: translate(-50%, -50%);
-  background-image: url();
+
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="contact-comp h-full w-72 bg-gray-100  flex flex-col relative border-r-2"
+    class="contact-comp h-full w-72 bg-gray-100 flex flex-col relative border-r-2"
   >
     <div class="tab-group flex h-10 bg-gray-100">
       <div
@@ -31,8 +31,8 @@
         ></i>
       </div>
     </div>
-    <div class="tabPanel overflow-y-scroll w-full overflow-x-hidden">
-      <chatItem v-if="tabName == 'chats'"/>
+    <div class="tabPanel overflow-y-scroll w-full overflow-x-hidden h-full">
+      <chatItem v-if="tabName == 'chats'" />
       <friendItem v-else-if="tabName == 'friends'" />
       <groupItem :list="groups" v-else />
     </div>

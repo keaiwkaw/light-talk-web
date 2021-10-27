@@ -4,12 +4,13 @@
     <Chat @toSendVideo="toSendVideo" @openAudioView="openAudioView" />
     <MyVideo ref="videoComp"></MyVideo>
     <GroupAudio ref="groupAudio"></GroupAudio>
+  
   </div>
 </template>
 
 <script>
-import Contact from "@/components/contact/index.vue";
-import Chat from "@/components/chat/index.vue";
+import Contact from "@/views/connection/index.vue";
+import Chat from "@/views/chat-window/index.vue";
 import MyVideo from "@/components/video";
 import GroupAudio from "@/components/groupAudio";
 import { getFriends, getGroups } from "@/service/getData";
@@ -32,6 +33,7 @@ export default {
       list: [],
       join: [],
       management: [],
+    
     };
   },
   methods: {
